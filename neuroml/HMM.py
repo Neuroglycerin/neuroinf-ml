@@ -1,8 +1,6 @@
 #!/usr/bin/python
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 
 def transition_probability(state_from, state_to, N=5):
     """
@@ -156,13 +154,3 @@ class HMM():
         self.ht_dist = self.alpha/sum(self.alpha)
 
         return self.ht_dist
-
-def plot_heatmap(v):
-    """
-    Plot a heatmap given a vector of 
-    state probabilities.
-    """
-    N = int(np.sqrt(len(v)))
-    plt.imshow(v.reshape([N,N]),cmap = cm.Greys_r)
-    return None
-

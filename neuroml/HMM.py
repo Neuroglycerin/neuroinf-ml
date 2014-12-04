@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 def transition_probability(state_from, state_to, N=5):
     """
@@ -97,8 +99,10 @@ class HMM():
         self.transition = transition
         self.emission = emission
 
+        # N states (DIFFERS FROM NOTATION IN NOTEBOOK)
+        N = self.transition.shape[0]
         # initialise hidden state with uniform
-        self.ht_dist = np.ones([N*N]) * 1.0 / (N * N)
+        self.ht_dist = np.ones([N,1]) * 1.0 / N
         return None
 
     def _find_emission(self,observation):
@@ -119,12 +123,14 @@ class HMM():
         # combine emission probabilities and convert to column vector 
         emission_probabilities = np.prod(emission_probabilities,
                                             axis=1)[np.newaxis].T
-
+        
         return emission_probabilities
 
     def _alpha_update(self,alpha,observation):
         """Defined as joint distribution of h_t and v_1:t.
         Return a discrete probability distribution."""
+        # find emission probabilities for this observation
+        emission_probabilities = self._find_emission(observation)
         # calculate new alpha
         alpha = emission_probabilities * np.dot(self.transition,alpha)
         return alpha
@@ -140,12 +146,23 @@ class HMM():
             * hidden state
         """
         try:
-            self.alpha = _alpha_update(alpha,observation)
-        except NameError:
+            self.alpha = self._alpha_update(self.alpha,observation)
+        except AttributeError:
             # if we haven't made an alpha yet
-            emission_probabilities = 
-            alpha = emission_probabilities * self.ht_dist
+            emission_probabilities = self._find_emission(observation)
+            self.alpha = emission_probabilities * self.ht_dist
 
+        # calculate new hidden state
+        self.ht_dist = self.alpha/sum(self.alpha)
 
+        return self.ht_dist
 
-        return hiddenstate
+def plot_heatmap(v):
+    """
+    Plot a heatmap given a vector of 
+    state probabilities.
+    """
+    N = int(np.sqrt(len(v)))
+    plt.imshow(v.reshape([N,N]),cmap = cm.Greys_r)
+    return None
+
